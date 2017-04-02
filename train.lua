@@ -51,7 +51,7 @@ function GenerateTrainingSet()
     end
 end
 
--- GenerateTrainingSet()
+GenerateTrainingSet()
 
 -- -- This is where we build the model
 -- model = nn.Sequential()                       -- Create network
