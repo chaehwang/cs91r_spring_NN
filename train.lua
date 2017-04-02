@@ -51,84 +51,84 @@ function GenerateTrainingSet()
     end
 end
 
-GenerateTrainingSet()
+-- GenerateTrainingSet()
 
--- This is where we build the model
-model = nn.Sequential()                       -- Create network
+-- -- This is where we build the model
+-- model = nn.Sequential()                       -- Create network
 
--- First convolution, using ten, 7-element kernels
-model:add(nn.TemporalConvolution(1, 10, 7))   -- 64x1 goes in, 58x10 goes out
-model:add(nn.TemporalMaxPooling(2))           -- 58x10 goes in, 29x10 goes out
-model:add(nn.ReLU())                          -- non-linear activation function
+-- -- First convolution, using ten, 7-element kernels
+-- model:add(nn.TemporalConvolution(1, 10, 7))   -- 64x1 goes in, 58x10 goes out
+-- model:add(nn.TemporalMaxPooling(2))           -- 58x10 goes in, 29x10 goes out
+-- model:add(nn.ReLU())                          -- non-linear activation function
 
--- Second convolution, using 5, 7-element kernels
-model:add(nn.TemporalConvolution(10, 5, 7))   -- 29x10 goes in, 23x5 goes out
-model:add(nn.TemporalMaxPooling(2))           -- 23x5 goes in, 11x5 goes out
-model:add(nn.ReLU())                          -- non-linear activation function
+-- -- Second convolution, using 5, 7-element kernels
+-- model:add(nn.TemporalConvolution(10, 5, 7))   -- 29x10 goes in, 23x5 goes out
+-- model:add(nn.TemporalMaxPooling(2))           -- 23x5 goes in, 11x5 goes out
+-- model:add(nn.ReLU())                          -- non-linear activation function
 
--- After convolutional layers, time to do fully connected network
-model:add(nn.View(11*5))                        -- Reshape network into 1D tensor
+-- -- After convolutional layers, time to do fully connected network
+-- model:add(nn.View(11*5))                        -- Reshape network into 1D tensor
 
-model:add(nn.Linear(11*5, 30))                  -- Fully connected layer, 55 inputs, 30 outputs
-model:add(nn.ReLU())                            -- non-linear activation function
+-- model:add(nn.Linear(11*5, 30))                  -- Fully connected layer, 55 inputs, 30 outputs
+-- model:add(nn.ReLU())                            -- non-linear activation function
 
-model:add(nn.Linear(30, 2))                     -- Final layer has 2 outputs. One for triangle wave, one for square
-model:add(nn.ReLU())                            -- non-linear activation function
-model:add(nn.LogSoftMax())                      -- log-probability output, since this is a classification problem
+-- model:add(nn.Linear(30, 2))                     -- Final layer has 2 outputs. One for triangle wave, one for square
+-- model:add(nn.ReLU())                            -- non-linear activation function
+-- model:add(nn.LogSoftMax())                      -- log-probability output, since this is a classification problem
 
-criterion = nn.ClassNLLCriterion()
-trainer = nn.StochasticGradient(model, criterion)
-trainer.learningRate = 0.01
-trainer.maxIteration = 200 -- do 200 epochs of training
+-- criterion = nn.ClassNLLCriterion()
+-- trainer = nn.StochasticGradient(model, criterion)
+-- trainer.learningRate = 0.01
+-- trainer.maxIteration = 200 -- do 200 epochs of training
 
-trainer:train(trainset)
+-- trainer:train(trainset)
 
--- Lets see an example output
-model:forward(trainset.data[123])
+-- -- Lets see an example output
+-- model:forward(trainset.data[123])
 
--- Lets see which label that is
-trainset.label[123]
+-- -- Lets see which label that is
+-- -- trainset.label[123]
 
-function TestTrainset()
-    correct = 0
-    for i=1,nExamples do
-        local groundtruth = trainset.label[i]
-        local prediction = model:forward(trainset.data[i])
-        local confidences, indices = torch.sort(prediction, true)  -- sort in descending order
-        if groundtruth == indices[1] then
-            correct = correct + 1
-        else
-            --print("Incorrect! "..tostring(i))
-        end
-    end
-    print(tostring(correct))
-end
+-- function TestTrainset()
+--     correct = 0
+--     for i=1,nExamples do
+--         local groundtruth = trainset.label[i]
+--         local prediction = model:forward(trainset.data[i])
+--         local confidences, indices = torch.sort(prediction, true)  -- sort in descending order
+--         if groundtruth == indices[1] then
+--             correct = correct + 1
+--         else
+--             --print("Incorrect! "..tostring(i))
+--         end
+--     end
+--     print(tostring(correct))
+-- end
 
-TestTrainset()
+-- TestTrainset()
 
--- Generate a new set of data, and test it
-for i=1,10 do
-    GenerateTrainingSet()
-    TestTrainset()
-end
+-- -- Generate a new set of data, and test it
+-- for i=1,10 do
+--     GenerateTrainingSet()
+--     TestTrainset()
+-- end
 
 
-require 'image'
-itorch.image(model.modules[1].weight)
+-- require 'image'
+-- itorch.image(model.modules[1].weight)
 
-function IntroduceNoise()
-    for i=1,nExamples do
-        for j=1,64 do
-            trainset.data[i][j] = trainset.data[i][j] + torch.normal(0,.25);
-        end
-    end
-end
+-- function IntroduceNoise()
+--     for i=1,nExamples do
+--         for j=1,64 do
+--             trainset.data[i][j] = trainset.data[i][j] + torch.normal(0,.25);
+--         end
+--     end
+-- end
 
--- Generate a new set of data, and test it
-for i=1,10 do
-    GenerateTrainingSet()
-    IntroduceNoise()
-    TestTrainset()
-end
+-- -- Generate a new set of data, and test it
+-- for i=1,10 do
+--     GenerateTrainingSet()
+--     IntroduceNoise()
+--     TestTrainset()
+-- end
 
 
